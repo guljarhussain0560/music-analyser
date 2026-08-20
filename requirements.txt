@@ -28,7 +28,7 @@ fastapi-mail>=1.4.1
 # === Audio Processing & ML Constraints ===
 tensorflow==2.9.3
 numpy==1.23.5
-urllib3<2.0
+urllib3<3.0
 librosa>=0.10.1
 spleeter>=2.4.0
 pydub>=0.25.1

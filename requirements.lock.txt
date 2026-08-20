@@ -30,7 +30,7 @@ spotdl==4.2.4
 spotipy==2.23.0
 SQLAlchemy==2.0.28
 tensorflow==2.9.3
-urllib3==1.26.18
+urllib3==2.7.0
 uvicorn==0.28.0
 yt-dlp==2024.3.10
 ytmusicapi==1.7.0
