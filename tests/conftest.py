@@ -2,9 +2,27 @@ import os
 
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
+import httpx
+
+# Compatibility shim for starlette TestClient across httpx versions (<0.20 and >=0.20)
+if not hasattr(httpx.Client, "_orig_init"):
+    _orig_init = httpx.Client.__init__
+
+    def _patched_init(self, *args, **kwargs):
+        if "follow_redirects" in kwargs:
+            # Map follow_redirects to allow_redirects if running under older httpx
+            import inspect
+
+            sig = inspect.signature(_orig_init)
+            if "follow_redirects" not in sig.parameters and "allow_redirects" in sig.parameters:
+                kwargs["allow_redirects"] = kwargs.pop("follow_redirects")
+        return _orig_init(self, *args, **kwargs)
+
+    httpx.Client._orig_init = _orig_init
+    httpx.Client.__init__ = _patched_init
+
 import tempfile
 from collections.abc import Generator
-
 import numpy as np
 import pytest
 import soundfile as sf
