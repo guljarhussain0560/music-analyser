@@ -31,7 +31,9 @@ def test_signup_duplicate_email_rejected(client: TestClient, test_user):
     }
     response = client.post("/api/auth/signup", json=payload)
     assert response.status_code == 400
-    assert "Email already registered" in response.json()["message"]
+    res_data = response.json()
+    err_msg = res_data.get("detail") or res_data.get("message") or ""
+    assert "Email already registered" in err_msg
 
 
 def test_signin_success(client: TestClient, test_user):

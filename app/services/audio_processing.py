@@ -95,9 +95,10 @@ def execute_pipeline(
             for stem, wav_path in spleeter_results.items()
         }
         for fut in as_completed(futures):
+            stem_key = futures[fut]
             res = fut.result()
             if res:
-                stem_urls[res[0]] = res[1]
+                stem_urls[stem_key] = res[1]
 
     # Phase 4: Parallel Multiprocessing Stem Analytics
     input_stem_dir = (
