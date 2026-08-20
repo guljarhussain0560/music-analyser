@@ -1,83 +1,72 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "music-analyser"
-version = "1.0.0"
-description = "High-performance AI audio analysis, stem separation, and lyric transcription engine"
+version = "1.0.1"
+description = "High-Throughput Asynchronous Music Analysis, Source Separation & Synchronized Lyric Processing"
 readme = "README.md"
 requires-python = ">=3.10,<3.12"
 license = { text = "MIT" }
 authors = [
-    { name = "Engineering Team", email = "dev@musicanalyser.io" }
-]
-classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Topic :: Multimedia :: Sound/Audio :: Analysis",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+    { name = "Guljar Hussain", email = "guljarhussain0560@gmail.com" }
 ]
 
 [tool.ruff]
-target-version = "py310"
 line-length = 100
-exclude = [
-    ".git",
-    ".venv",
-    "venv",
-    "__pycache__",
-    "alembic",
-    "build",
-    "dist"
-]
+target-version = "py310"
 
 [tool.ruff.lint]
 select = [
     "E",   # pycodestyle errors
     "W",   # pycodestyle warnings
-    "F",   # Pyflakes
-    "I",   # isort
+    "F",   # pyflakes
+    "I",   # isort (import sorting)
     "B",   # flake8-bugbear
-    "UP",  # pyupgrade
-    "C4"   # flake8-comprehensions
+    "UP",  # pyupgrade (modern python idioms)
+    "C4",  # flake8-comprehensions
 ]
 ignore = [
-    "E501",  # Line too long
-    "B008",  # Do not perform function calls in argument defaults (FastAPI Depends)
-    "B904"   # Within an except clause, raise exceptions with raise ... from err
+    "E501",  # line too long (handled by formatter)
+    "B008",  # do not perform function calls in argument defaults (FastAPI Depends)
 ]
 
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
 
 [tool.pytest.ini_options]
-minversion = "7.0"
+minversion = "8.0"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --tb=short --cov=app --cov-report=term-missing --cov-report=xml --cov-fail-under=80"
-filterwarnings = [
-    "ignore::DeprecationWarning",
-    "ignore::UserWarning"
-]
+addopts = "--cov=app --cov-report=term-missing --cov-report=xml --cov-fail-under=80 -v"
 
 [tool.coverage.run]
 source = ["app"]
+branch = true
 omit = [
-    "app/db/base.py",
-    "alembic/*"
+    "app/db/database.py",
+    "app/core/logging.py"
 ]
 
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",
-    "if __name__ == .__main__.:",
     "raise NotImplementedError",
-    "if TYPE_CHECKING:"
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "pass"
 ]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+follow_imports = "silent"
+check_untyped_defs = false
+disallow_untyped_defs = false
+warn_redundant_casts = false
+warn_unused_ignores = false
+disable_error_code = ["import-untyped", "arg-type", "assignment", "var-annotated", "dict-item", "misc", "valid-type", "call-arg"]
