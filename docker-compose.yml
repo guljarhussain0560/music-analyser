@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: music-analyser-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_NAME=AI Music Analyser
+      - APP_ENV=production
+      - PORT=8080
+      - DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/musicanalyser
+      - SECRET_KEY=change-this-secret-key-in-production-min-32-chars
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  db:
+    image: postgres:15-alpine
+    container_name: music-analyser-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=musicanalyser
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d musicanalyser"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

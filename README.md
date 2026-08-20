@@ -1,10 +1,12 @@
 # AI Music Analyser
 
-[![CI Pipeline](https://github.com/guljarhussain0560/AI-Music-Analyser/actions/workflows/ci.yml/badge.svg)](https://github.com/guljarhussain0560/AI-Music-Analyser/actions)
+[![CI Pipeline](https://github.com/guljarhussain0560/music-analyser/actions/workflows/ci.yml/badge.svg)](https://github.com/guljarhussain0560/music-analyser/actions)
+[![Docker Build](https://github.com/guljarhussain0560/music-analyser/actions/workflows/docker-build.yml/badge.svg)](https://github.com/guljarhussain0560/music-analyser/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11-blue.svg)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![Test Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)](https://github.com/guljarhussain0560/AI-Music-Analyser)
+[![Type Checked: Mypy](https://img.shields.io/badge/types-mypy-blue.svg)](http://mypy-lang.org/)
+[![Test Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)](https://github.com/guljarhussain0560/music-analyser)
 
 **AI Music Analyser** is an asynchronous, high-throughput music analysis and audio processing backend built with **FastAPI**, **Spleeter**, **Librosa**, and **Groq Whisper**. It ingests audio tracks via YouTube URLs, Spotify links, or direct file uploads, executes parallel stem separation and analytical feature extraction, transcribes synchronized timestamped lyrics, and provides intelligent music-theory queries via an integrated LLM assistant.
 
@@ -18,7 +20,7 @@
 - **Specialized Instrument Profiling**: Dedicated analytics for isolated guitar (strum vs. pick, chord complexity), violin & flute (vibrato rate/depth, legato articulation).
 - **Synchronized Lyric Transcription & AI Rewriting**: Sub-second speech-to-text with Groq Whisper-large-v3, timestamped `.lrc` formatting, and context-aware lyric rewriting.
 - **Non-blocking Concurrency**: Multi-tiered concurrency leveraging `concurrent.futures.ThreadPoolExecutor` for network I/O and `multiprocessing.Pool` for CPU-intensive DSP tasks.
-- **Production Hardened**: Structured JSON logging, Pydantic v2 settings validation, bcrypt password hashing, JWT authentication, and full pytest test suite with >85% code coverage.
+- **Production Hardened**: Structured JSON logging, Pydantic v2 settings validation, bcrypt password hashing (72-byte safe), JWT authentication, committed reproducible lockfile (`requirements.lock`), and full pytest test suite with >85% code coverage.
 
 ---
 
@@ -72,13 +74,14 @@
 
 ### 1. Clone and Setup Environment
 ```bash
-git clone https://github.com/guljarhussain0560/AI-Music-Analyser.git
-cd AI-Music-Analyser
+git clone https://github.com/guljarhussain0560/music-analyser.git
+cd music-analyser
 
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r requirements.lock
+pip install spleeter>=2.4.0 --no-deps
 ```
 
 ### 2. Environment Configuration
@@ -108,28 +111,38 @@ Interactive OpenAPI documentation will be available at: [http://localhost:8080/d
 
 ---
 
-## Running Tests & Code Quality
+## Running with Docker & Docker Compose
 
-Run the test suite with coverage report:
+Start the full stack with PostgreSQL database:
 ```bash
-pytest --cov=app --cov-report=term-missing
+docker-compose up -d --build
 ```
-
-Run linter and formatting checks:
+Check application logs:
 ```bash
-ruff check app tests
-ruff format --check app tests
+docker-compose logs -f app
 ```
 
 ---
 
-## Docker Deployment
+## Running Tests & Code Quality
 
-Build and run using Docker:
+Run unit and integration test suite with coverage report:
 ```bash
-docker build -t music-analyser:latest .
-docker run -p 8080:8080 --env-file .env music-analyser:latest
+pytest --cov=app --cov-report=term-missing
 ```
+
+Run linter, formatting, and type checks:
+```bash
+ruff check app tests
+ruff format --check app tests
+mypy app
+```
+
+---
+
+## Security
+
+Security policies, secret management guidelines, and threat modeling are documented in [SECURITY.md](SECURITY.md).
 
 ---
 
