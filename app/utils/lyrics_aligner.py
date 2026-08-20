@@ -51,4 +51,4 @@ def rewrite_lyrics_with_timestamps(
         return rewritten
     except Exception as e:
         logger.error(f"Failed rewriting lyrics via Groq LLM: {e}")
-        raise TranscriptionError(f"Lyric rewriting failed: {e}")
+        raise TranscriptionError(f"Lyric rewriting failed: {e}") from e

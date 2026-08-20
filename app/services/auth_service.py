@@ -46,7 +46,7 @@ def authenticate_google_user(db: Session, token: schemas.GoogleToken) -> dict[st
 
     except ValueError as e:
         logger.error(f"Invalid Google ID token: {e}")
-        raise AuthenticationError("Invalid Google authentication token")
+        raise AuthenticationError("Invalid Google authentication token") from e
 
     user = crud.get_user_by_email(db, email=email)
     if not user:

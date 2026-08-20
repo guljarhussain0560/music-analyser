@@ -58,10 +58,10 @@ def download_from_youtube(url: str, output_dir: str) -> str:
     except subprocess.CalledProcessError as e:
         err_msg = e.stderr.strip() if e.stderr else str(e)
         logger.error(f"yt-dlp YouTube download failed: {err_msg}")
-        raise DownloaderError(f"YouTube download failed: {err_msg}")
+        raise DownloaderError(f"YouTube download failed: {err_msg}") from e
     except Exception as e:
         logger.error(f"Unexpected error downloading from YouTube: {e}")
-        raise DownloaderError(f"Could not download audio from YouTube: {e}")
+        raise DownloaderError(f"Could not download audio from YouTube: {e}") from e
 
 
 def spotify_to_ytmusic_url(spotify_url: str) -> str:
@@ -92,7 +92,7 @@ def spotify_to_ytmusic_url(spotify_url: str) -> str:
 
     except Exception as e:
         logger.error(f"Failed resolving Spotify track to YouTube Music: {e}")
-        raise DownloaderError(f"Spotify track resolution failed: {e}")
+        raise DownloaderError(f"Spotify track resolution failed: {e}") from e
 
 
 def download_from_spotify(url: str, output_dir: str) -> str:

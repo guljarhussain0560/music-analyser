@@ -28,20 +28,20 @@ def get_current_user(
     )
     payload = decode_access_token(token)
     if not payload:
-        raise credentials_exception
+        raise credentials_exception from None
 
     user_id_str: str = payload.get("sub")
     if not user_id_str:
-        raise credentials_exception
+        raise credentials_exception from None
 
     try:
         user_id = int(user_id_str)
     except ValueError:
-        raise credentials_exception
+        raise credentials_exception from None
 
     user = crud.get_user(db, user_id=user_id)
     if user is None:
-        raise credentials_exception
+        raise credentials_exception from None
 
     return user
 

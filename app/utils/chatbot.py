@@ -39,4 +39,4 @@ async def get_ai_answer(user_question: str) -> str:
             return data["choices"][0]["message"]["content"]
     except Exception as e:
         logger.error(f"Chatbot API error: {e}")
-        raise AppException(f"AI Assistant unavailable: {e}", status_code=503)
+        raise AppException(f"AI Assistant unavailable: {e}", status_code=503) from e

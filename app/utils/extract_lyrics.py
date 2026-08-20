@@ -57,13 +57,13 @@ def transcribe_lyrics(audio_path: str, max_retries: int = 3) -> dict[str, Any]:
                 time.sleep(wait_time)
             else:
                 logger.error(f"Groq transcription HTTP error: {http_err}")
-                raise TranscriptionError(f"Transcription failed: {http_err}")
+                raise TranscriptionError(f"Transcription failed: {http_err}") from http_err
         except Exception as e:
             if attempt < max_retries - 1:
                 time.sleep(2**attempt)
             else:
                 logger.error(f"Groq transcription network failure: {e}")
-                raise TranscriptionError(f"Network error during transcription: {e}")
+                raise TranscriptionError(f"Network error during transcription: {e}") from e
 
     if not transcription_data:
         raise TranscriptionError("No transcription response received from Groq API.")
