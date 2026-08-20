@@ -20,7 +20,8 @@ WORKDIR /app
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir spleeter>=2.4.0 --no-deps
 
 # =================================================================
 # Stage 2: Final Production Runtime

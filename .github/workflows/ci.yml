@@ -74,6 +74,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
+          pip install spleeter>=2.4.0 --no-deps
 
       - name: Run Pytest with Coverage
         run: |
