@@ -23,6 +23,7 @@ if not hasattr(httpx.Client, "_orig_init"):
 
 import tempfile
 from collections.abc import Generator
+
 import numpy as np
 import pytest
 import soundfile as sf
