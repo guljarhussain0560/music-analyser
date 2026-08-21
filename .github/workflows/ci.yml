@@ -71,9 +71,7 @@ jobs:
           pip install pip-audit
 
       - name: Audit Dependencies (Strict Blocking Gate)
-        run: |
-          # CVE-2023-46136: Accepted low-severity upstream issue in legacy keras packaging
-          pip-audit -r requirements.lock --ignore-vuln CVE-2023-46136
+        run: python scripts/security_audit.py
 
   test:
     name: Pytest Suite & Coverage
