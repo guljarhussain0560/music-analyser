@@ -1,0 +1,49 @@
+{
+  "_meta": {
+    "hash": {
+      "sha256": "4b8254c360980f76de6b2b7371c6183efdcbd4663efc8e23547f872f2d87e07a"
+    },
+    "pipfile-spec": 6,
+    "requires": {
+      "python_version": "3.10"
+    },
+    "sources": [
+      {
+        "name": "pypi",
+        "url": "https://pypi.org/simple",
+        "verify_ssl": true
+      }
+    ]
+  },
+  "default": {
+    "fastapi": {
+      "version": "==0.110.0"
+    },
+    "pydantic": {
+      "version": "==2.7.0"
+    },
+    "sqlalchemy": {
+      "version": "==2.0.28"
+    },
+    "sentry-sdk": {
+      "version": "==1.40.6"
+    },
+    "librosa": {
+      "version": "==0.10.1"
+    },
+    "spleeter": {
+      "version": "==2.4.0"
+    }
+  },
+  "develop": {
+    "pytest": {
+      "version": "==8.1.1"
+    },
+    "ruff": {
+      "version": "==0.3.4"
+    },
+    "mypy": {
+      "version": "==1.9.0"
+    }
+  }
+}

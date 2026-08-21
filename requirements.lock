@@ -37,6 +37,7 @@ python-multipart==0.0.9
 requests==2.31.0
 ruff==0.3.4
 scipy==1.11.4
+sentry-sdk==1.40.6
 soundfile==0.12.1
 spotipy==2.23.0
 SQLAlchemy==2.0.28
