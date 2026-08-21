@@ -26,8 +26,26 @@ logger = get_logger("app.main")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Application lifespan manager for initialization and graceful shutdown."""
+    """Application lifespan manager for initialization, APM error tracking, and graceful shutdown."""
     logger.info(f"Starting {settings.APP_NAME} in [{settings.APP_ENV}] mode")
+
+    # Initialize Sentry APM error tracking if DSN is configured
+    if settings.SENTRY_DSN:
+        try:
+            import sentry_sdk
+            from sentry_sdk.integrations.fastapi import FastApiIntegration
+            from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+
+            sentry_sdk.init(
+                dsn=settings.SENTRY_DSN,
+                environment=settings.APP_ENV,
+                traces_sample_rate=settings.SENTRY_TRACES_SAMPLE_RATE,
+                integrations=[FastApiIntegration(), SqlalchemyIntegration()],
+            )
+            logger.info("Sentry APM and error tracking initialized successfully")
+        except Exception as e:
+            logger.warning(f"Failed initializing Sentry APM: {e}")
+
     try:
         init_db()
         logger.info("Database schema initialized successfully")
@@ -40,7 +58,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(
     title=settings.APP_NAME,
     description="High-Throughput Asynchronous Music Analysis, Source Separation & Synchronized Lyric Processing API",
-    version="1.0.0",
+    version="1.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
@@ -104,6 +122,13 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
     logger.exception(f"Unhandled internal server error on {request.url.path}: {str(exc)}")
+    if settings.SENTRY_DSN:
+        try:
+            import sentry_sdk
+
+            sentry_sdk.capture_exception(exc)
+        except Exception:
+            pass
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "An internal server error occurred. Please try again later."},
