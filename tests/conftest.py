@@ -1,16 +1,16 @@
 import os
+import secrets
 
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
 import httpx
 
-# Compatibility shim for starlette TestClient across httpx versions (<0.20 and >=0.20)
+# Compatibility shim for starlette TestClient across httpx versions
 if not hasattr(httpx.Client, "_orig_init"):
     _orig_init = httpx.Client.__init__
 
     def _patched_init(self, *args, **kwargs):
         if "follow_redirects" in kwargs:
-            # Map follow_redirects to allow_redirects if running under older httpx
             import inspect
 
             sig = inspect.signature(_orig_init)
@@ -52,11 +52,13 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
+    """Initializes isolated test configuration with dynamically generated credentials."""
     settings.APP_ENV = "test"
-    settings.SECRET_KEY = "test-secret-key-for-unit-testing-purposes-only-32bytes"
+    settings.SECRET_KEY = secrets.token_urlsafe(32)
     settings.ALGORITHM = "HS256"
     settings.AWS_S3_BUCKET_NAME = ""
     settings.GROQ_API_KEY = ""
+    settings.SENTRY_DSN = None
 
 
 @pytest.fixture(scope="function")
@@ -79,18 +81,19 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
             pass
 
     app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as test_client:
-        yield test_client
+    with TestClient(app) as c:
+        yield c
     app.dependency_overrides.clear()
 
 
 @pytest.fixture
 def test_user(db_session: Session) -> User:
+    """Creates a persisted test user in the SQLite test database."""
     user = User(
-        name="Test Artist",
-        username="testartist",
-        email="artist@example.com",
+        email="testuser@example.com",
+        username="testuser",
         hashed_password=get_password_hash("SecretPassword123!"),
+        name="Test User",
         is_active=True,
     )
     db_session.add(user)
@@ -100,22 +103,28 @@ def test_user(db_session: Session) -> User:
 
 
 @pytest.fixture
-def auth_headers(test_user: User) -> dict:
+def auth_headers(test_user: User) -> dict[str, str]:
+    """Generates authorization header with valid JWT token for test user."""
     token = create_access_token(data={"sub": str(test_user.id)})
     return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.fixture
 def sample_wav_file() -> Generator[str, None, None]:
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-        sr = 22050
-        duration = 2.0
-        t = np.linspace(0, duration, int(sr * duration), endpoint=False)
-        audio_data = 0.5 * np.sin(2 * np.pi * 440 * t) + 0.25 * np.sin(2 * np.pi * 880 * t)
-        sf.write(tmp.name, audio_data, sr, subtype="PCM_16")
-        tmp_path = tmp.name
+    """Generates a temporary 2-second synthesized 440Hz sine wave audio file for DSP tests."""
+    sr = 22050
+    duration = 2.0
+    t = np.linspace(0, duration, int(sr * duration), endpoint=False)
+    audio = 0.5 * np.sin(2 * np.pi * 440 * t)
 
-    yield tmp_path
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+        wav_path = f.name
 
-    if os.path.exists(tmp_path):
-        os.remove(tmp_path)
+    sf.write(wav_path, audio, sr)
+    yield wav_path
+
+    if os.path.exists(wav_path):
+        try:
+            os.remove(wav_path)
+        except OSError:
+            pass
